@@ -4,7 +4,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <UserSecretsId>aspnet-Hotboil-2c4a958e-1aab-4365-ae4d-dd77baa883d4</UserSecretsId>
+    <UserSecretsId>Hotboil</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -17,13 +17,18 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Areas\Account\" />
+    <Folder Include="Areas\Account\Pages\" />
     <Folder Include="Data\Migrations\" />
+    <Folder Include="wwwroot\lib\" />
+    <Folder Include="wwwroot\lib\bootstrap\" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="Properties\serviceDependencies.local.json" />
-    <None Remove="Properties\serviceDependencies.json" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\jquery-validation\dist\additional-methods.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\jquery-validation\dist\additional-methods.min.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\jquery-validation\dist\jquery.validate.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\jquery-validation\dist\jquery.validate.min.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\jquery-validation\LICENSE.md" />
   </ItemGroup>
 
 </Project>

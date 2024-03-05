@@ -10,14 +10,10 @@
      max-width: 480px;
      padding: 1rem;
    }
-   
-   .form-signin .form-floating:focus-within {
-     z-index: 2;
-   }
 </style>
 
 <div class="m-auto form-signin">
-    <h3 class="mb-4">@ViewData["Title"]</h3>
+    <h4 class="mb-4">@ViewData["Title"]</h4>
     <form id="account" method="post">
         <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
         <div class="mb-3">
@@ -38,24 +34,19 @@
                 </label>
             </div>
             <div class="ms-auto">
-                 <a asp-page="./ForgotPassword">Forgot password?</a>
+                <a asp-page="./ForgotPassword">Forgot password?</a>
             </div>
         </div>
         <div>
             <button id="login-submit" type="submit" class="w-100 btn btn-primary">Sign in</button>
         </div>
-        <div class="mt-3 d-flex justify-content-between align-items-center">
-            <hr class=" flex-grow-1"/> 
-            <div class="">Or sign in with</div>
-            <hr class=" flex-grow-1"/> 
+        <div class="mt-3">
+            Not a member? <a asp-page="./SignUp">Sign up now</a>
         </div>
-        <div>
-            <p>
-                <a asp-page="./" asp-route-returnUrl="@Model.ReturnUrl">Register as a new user</a>
-            </p>
-            <p>
-                <a id="resend-confirmation" asp-page="./ResendEmailConfirmation">Resend email confirmation</a>
-            </p>
+        <div class="mt-3 d-flex justify-content-between">
+            <hr class="flex-grow-1 mt-4"/>
+            <div class="mx-2 my-2">Or</div>
+            <hr class="flex-grow-1 mt-4"/>
         </div>
     </form>
 </div>

@@ -15,7 +15,15 @@ builder.Services.AddAuthentication(o =>
         o.DefaultScheme = IdentityConstants.ApplicationScheme;
         o.DefaultSignInScheme = IdentityConstants.ExternalScheme;
     })
-    .AddIdentityCookies(o => { });
+    .AddIdentityCookies(o =>
+    {
+        o.ApplicationCookie.Configure(c =>
+        {
+            c.LoginPath = "/signin";
+            c.LogoutPath = "/signout";
+            c.AccessDeniedPath = "/accessdenied";
+        });
+    });
 
 builder.Services.AddIdentityCore<IdentityUser>(o =>
     {
@@ -36,18 +44,14 @@ if (app.Environment.IsDevelopment())
 }
 else
 {
-    app.UseExceptionHandler("/Error");
+    app.UseExceptionHandler("/error");
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
 app.UseRouting();
-
 app.UseAuthorization();
-
 app.MapRazorPages();
-
 app.Run();

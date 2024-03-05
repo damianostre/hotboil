@@ -5,6 +5,8 @@ VisualStudioVersion = 17.9.34616.47
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hotboil", "Hotboil\Hotboil.csproj", "{76C5FDC1-1236-4446-928C-7DCE67BDE499}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hotboil.Mailer", "Hotboil.Mailer\Hotboil.Mailer.csproj", "{7DD46B90-8689-417F-9850-96E4F7644E66}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{76C5FDC1-1236-4446-928C-7DCE67BDE499}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{76C5FDC1-1236-4446-928C-7DCE67BDE499}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{76C5FDC1-1236-4446-928C-7DCE67BDE499}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7DD46B90-8689-417F-9850-96E4F7644E66}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7DD46B90-8689-417F-9850-96E4F7644E66}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7DD46B90-8689-417F-9850-96E4F7644E66}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7DD46B90-8689-417F-9850-96E4F7644E66}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

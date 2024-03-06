@@ -1,6 +1,6 @@
 ﻿namespace Hotboil.Mailer;
 
-public interface IMail
+public class MailerOptions
 {
     
 }

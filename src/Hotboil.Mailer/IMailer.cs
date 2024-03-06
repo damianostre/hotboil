@@ -2,7 +2,7 @@
 
 public class Mailer : IMailer
 {
-    public Task SendEmailAsync(IMail mail)
+    public Task SendEmailAsync(EmailModel emailModel)
     {
         throw new NotImplementedException();
     }

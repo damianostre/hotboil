@@ -5,13 +5,17 @@ namespace Hotboil.Mailer;
 public class MailerMail
 {
     protected EmailData Data { get; } = new();
+
+    public MailerMail()
+    {
+    }
     
     /// <summary>
     /// Adds all recipients in list to email
     /// </summary>
     /// <param name="mailAddresses">List of recipients</param>
     /// <returns>Instance of the Email class</returns>
-    public MailerMail To(IEnumerable<string> mailAddresses)
+    public static MailerMail To(IEnumerable<string> mailAddresses)
     {
         return To(mailAddresses.ToArray());
     }
@@ -21,66 +25,15 @@ public class MailerMail
     /// </summary>
     /// <param name="mailAddresses">List of recipients</param>
     /// <returns>Instance of the Email class</returns>
-    public MailerMail To(params string[] mailAddresses)
+    public static MailerMail To(params string[] mailAddresses)
     {
-        foreach (string address in mailAddresses)
+        var email = new MailerMail();
+        foreach (var address in mailAddresses)
         {
-            To(address);
+            email.Data.ToAddresses.Add(new Address(address));
         }
 
-        return this;
-    }
-
-    /// <summary>
-    /// Adds a recipient to the email, Splits name and address on ';'
-    /// </summary>
-    /// <param name="emailAddress">Email address of recipient</param>
-    /// <param name="name">Name of recipient</param>
-    /// <returns>Instance of the Email class</returns>
-    public MailerMail To(string emailAddress, string? name)
-    {
-        if (emailAddress.Contains(";"))
-        {
-            //email address has semi-colon, try split
-            var nameSplit = name?.Split(';') ?? new string [0];
-            var addressSplit = emailAddress.Split(';');
-            for (var i = 0; i < addressSplit.Length; i++)
-            {
-                var currentName = string.Empty;
-                if ((nameSplit.Length - 1) >= i)
-                {
-                    currentName = nameSplit[i];
-                }
-                Data.ToAddresses.Add(new Address(addressSplit[i].Trim(), currentName.Trim()));
-            }
-        }
-        else
-        {
-            Data.ToAddresses.Add(new Address(emailAddress.Trim(), name?.Trim()));
-        }
-        return this;
-    }
-
-    /// <summary>
-    /// Adds a recipient to the email
-    /// </summary>
-    /// <param name="emailAddress">Email address of recipient (allows multiple splitting on ';')</param>
-    /// <returns></returns>
-    public MailerMail To(string emailAddress)
-    {
-        if (emailAddress.Contains(";"))
-        {
-            foreach (string address in emailAddress.Split(';'))
-            {
-                Data.ToAddresses.Add(new Address(address));
-            }
-        }
-        else
-        {
-            Data.ToAddresses.Add(new Address(emailAddress));
-        }
-
-        return this;
+        return email;
     }
 
     /// <summary>
@@ -88,13 +41,15 @@ public class MailerMail
     /// </summary>
     /// <param name="mailAddresses">List of recipients</param>
     /// <returns>Instance of the Email class</returns>
-    public MailerMail To(IEnumerable<Address> mailAddresses)
+    public static MailerMail To(IEnumerable<Address> mailAddresses)
     {
+        var email = new MailerMail();
         foreach (var address in mailAddresses)
         {
-            Data.ToAddresses.Add(address);
+            email.Data.ToAddresses.Add(address);
         }
-        return this;
+
+        return email;
     }
 
     /// <summary>

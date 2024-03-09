@@ -2,20 +2,22 @@
 
 namespace Hotboil.Mailer;
 
-public class MailerMail
+public abstract class Mailable<T> where T: Mailable<T>, new()
 {
     protected EmailData Data { get; } = new();
+    
 
-    public MailerMail()
+    public Mailable()
     {
     }
+    
     
     /// <summary>
     /// Adds all recipients in list to email
     /// </summary>
     /// <param name="mailAddresses">List of recipients</param>
     /// <returns>Instance of the Email class</returns>
-    public static MailerMail To(IEnumerable<string> mailAddresses)
+    public Mailable<T> To(IEnumerable<string> mailAddresses)
     {
         return To(mailAddresses.ToArray());
     }
@@ -25,15 +27,14 @@ public class MailerMail
     /// </summary>
     /// <param name="mailAddresses">List of recipients</param>
     /// <returns>Instance of the Email class</returns>
-    public static MailerMail To(params string[] mailAddresses)
+    public Mailable<T> To(params string[] mailAddresses)
     {
-        var email = new MailerMail();
         foreach (var address in mailAddresses)
         {
-            email.Data.ToAddresses.Add(new Address(address));
+            Data.ToAddresses.Add(new Address(address));
         }
 
-        return email;
+        return this;
     }
 
     /// <summary>
@@ -41,15 +42,14 @@ public class MailerMail
     /// </summary>
     /// <param name="mailAddresses">List of recipients</param>
     /// <returns>Instance of the Email class</returns>
-    public static MailerMail To(IEnumerable<Address> mailAddresses)
+    public Mailable<T> To(IEnumerable<Address> mailAddresses)
     {
-        var email = new MailerMail();
         foreach (var address in mailAddresses)
         {
-            email.Data.ToAddresses.Add(address);
+            Data.ToAddresses.Add(address);
         }
 
-        return email;
+        return this;
     }
 
     /// <summary>
@@ -58,7 +58,7 @@ public class MailerMail
     /// <param name="emailAddress">Email address to cc</param>
     /// <param name="name">Name to cc</param>
     /// <returns>Instance of the Email class</returns>
-    public MailerMail CC(string emailAddress, string name = "")
+    public Mailable<T> CC(string emailAddress, string name = "")
     {
         Data.CcAddresses.Add(new Address(emailAddress, name));
         return this;
@@ -69,7 +69,7 @@ public class MailerMail
     /// </summary>
     /// <param name="mailAddresses">List of recipients to CC</param>
     /// <returns>Instance of the Email class</returns>
-    public MailerMail CC(IEnumerable<Address> mailAddresses)
+    public Mailable<T> CC(IEnumerable<Address> mailAddresses)
     {
         foreach (var address in mailAddresses)
         {
@@ -84,7 +84,7 @@ public class MailerMail
     /// <param name="emailAddress">Email address of bcc</param>
     /// <param name="name">Name of bcc</param>
     /// <returns>Instance of the Email class</returns>
-    public MailerMail BCC(string emailAddress, string name = "")
+    public Mailable<T> BCC(string emailAddress, string name = "")
     {
         Data.BccAddresses.Add(new Address(emailAddress, name));
         return this;
@@ -95,7 +95,7 @@ public class MailerMail
     /// </summary>
     /// <param name="mailAddresses">List of recipients to BCC</param>
     /// <returns>Instance of the Email class</returns>
-    public MailerMail BCC(IEnumerable<Address> mailAddresses)
+    public Mailable<T> BCC(IEnumerable<Address> mailAddresses)
     {
         foreach (var address in mailAddresses)
         {
@@ -109,7 +109,7 @@ public class MailerMail
     /// </summary>
     /// <param name="address">The ReplyTo Address</param>
     /// <returns></returns>
-    public MailerMail ReplyTo(string address)
+    public Mailable<T> ReplyTo(string address)
     {
         Data.ReplyToAddresses.Add(new Address(address));
 
@@ -122,7 +122,7 @@ public class MailerMail
     /// <param name="address">The ReplyTo Address</param>
     /// <param name="name">The Display Name of the ReplyTo</param>
     /// <returns></returns>
-    public MailerMail ReplyTo(string address, string name)
+    public Mailable<T> ReplyTo(string address, string name)
     {
         Data.ReplyToAddresses.Add(new Address(address, name));
 
@@ -134,39 +134,16 @@ public class MailerMail
     /// </summary>
     /// <param name="subject">email subject</param>
     /// <returns>Instance of the Email class</returns>
-    public MailerMail Subject(string subject)
+    public Mailable<T> Subject(string subject)
     {
         Data.Subject = subject;
         return this;
     }
 
     /// <summary>
-    /// Adds a Body to the Email
-    /// </summary>
-    /// <param name="body">The content of the body</param>
-    /// <param name="isHtml">True if Body is HTML, false for plain text (default)</param>
-    public MailerMail Body(string body, bool isHtml = false)
-    {
-        Data.IsHtml = isHtml;
-        Data.Body = body;
-        return this;
-    }
-
-    /// <summary>
-    /// Adds a Plaintext alternative Body to the Email. Used in conjunction with an HTML email,
-    /// this allows for email readers without html capability, and also helps avoid spam filters.
-    /// </summary>
-    /// <param name="body">The content of the body</param>
-    public MailerMail PlaintextAlternativeBody(string body)
-    {
-        Data.PlaintextAlternativeBody = body;
-        return this;
-    }
-
-    /// <summary>
     /// Marks the email as High Priority
     /// </summary>
-    public MailerMail HighPriority()
+    public Mailable<T> HighPriority()
     {
         Data.Priority = Priority.High;
         return this;
@@ -175,7 +152,7 @@ public class MailerMail
     /// <summary>
     /// Marks the email as Low Priority
     /// </summary>
-    public MailerMail LowPriority()
+    public Mailable<T> LowPriority()
     {
         Data.Priority = Priority.Low;
         return this;
@@ -186,7 +163,7 @@ public class MailerMail
     /// </summary>
     /// <param name="attachment">The Attachment to add</param>
     /// <returns>Instance of the Email class</returns>
-    public MailerMail Attach(Attachment attachment)
+    public Mailable<T> Attach(Attachment attachment)
     {
         if (!Data.Attachments.Contains(attachment))
         {
@@ -201,7 +178,7 @@ public class MailerMail
     /// </summary>
     /// <param name="attachments">The List of Attachments to add</param>
     /// <returns>Instance of the Email class</returns>
-    public MailerMail Attach(IEnumerable<Attachment> attachments)
+    public Mailable<T> Attach(IEnumerable<Attachment> attachments)
     {
         foreach (var attachment in attachments.Where(attachment => !Data.Attachments.Contains(attachment)))
         {
@@ -210,7 +187,7 @@ public class MailerMail
         return this;
     }
 
-    public MailerMail AttachFromFilename(string filename,  string contentType = null, string attachmentName = null)
+    public Mailable<T> AttachFromFilename(string filename,  string contentType = null, string attachmentName = null)
     {
         var stream = File.OpenRead(filename);
         Attach(new Attachment
@@ -228,14 +205,14 @@ public class MailerMail
     /// </summary>
     /// <param name="tag">Tag name, max 128 characters, ASCII only</param>
     /// <returns>Instance of the Email class</returns>
-    public MailerMail Tag(string tag)
+    public Mailable<T> Tag(string tag)
     {
         Data.Tags.Add(tag);
 
         return this;
     }
 
-    public MailerMail Header(string header, string body)
+    public Mailable<T> Header(string header, string body)
     {
         Data.Headers.Add(header, body);
 

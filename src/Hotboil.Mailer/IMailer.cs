@@ -2,12 +2,7 @@
 
 public class Mailer : IMailer
 {
-    public IMailer To(params string[] to)
-    {
-        return this;
-    }
-    
-    public Task SendAsync<T>(T model) where T: EmailModel
+    public Task SendAsync<T>(T mail) where T : Mailable<T>, new()
     {
         throw new NotImplementedException();
     }

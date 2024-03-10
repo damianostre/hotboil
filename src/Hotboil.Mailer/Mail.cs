@@ -2,22 +2,19 @@
 
 namespace Hotboil.Mailer;
 
-public abstract class Mailable<T> where T: Mailable<T>, new()
+public abstract class Mail<T> where T : Mail<T>, new()
 {
     protected EmailData Data { get; } = new();
     
-
-    public Mailable()
-    {
-    }
-    
+    public abstract string GetSubject();
+    public abstract string GetTemplate();
     
     /// <summary>
     /// Adds all recipients in list to email
     /// </summary>
     /// <param name="mailAddresses">List of recipients</param>
     /// <returns>Instance of the Email class</returns>
-    public Mailable<T> To(IEnumerable<string> mailAddresses)
+    public Mail<T> To(IEnumerable<string> mailAddresses)
     {
         return To(mailAddresses.ToArray());
     }
@@ -27,7 +24,7 @@ public abstract class Mailable<T> where T: Mailable<T>, new()
     /// </summary>
     /// <param name="mailAddresses">List of recipients</param>
     /// <returns>Instance of the Email class</returns>
-    public Mailable<T> To(params string[] mailAddresses)
+    public Mail<T> To(params string[] mailAddresses)
     {
         foreach (var address in mailAddresses)
         {
@@ -42,7 +39,7 @@ public abstract class Mailable<T> where T: Mailable<T>, new()
     /// </summary>
     /// <param name="mailAddresses">List of recipients</param>
     /// <returns>Instance of the Email class</returns>
-    public Mailable<T> To(IEnumerable<Address> mailAddresses)
+    public Mail<T> To(IEnumerable<Address> mailAddresses)
     {
         foreach (var address in mailAddresses)
         {
@@ -58,7 +55,7 @@ public abstract class Mailable<T> where T: Mailable<T>, new()
     /// <param name="emailAddress">Email address to cc</param>
     /// <param name="name">Name to cc</param>
     /// <returns>Instance of the Email class</returns>
-    public Mailable<T> CC(string emailAddress, string name = "")
+    public Mail<T> CC(string emailAddress, string name = "")
     {
         Data.CcAddresses.Add(new Address(emailAddress, name));
         return this;
@@ -69,7 +66,7 @@ public abstract class Mailable<T> where T: Mailable<T>, new()
     /// </summary>
     /// <param name="mailAddresses">List of recipients to CC</param>
     /// <returns>Instance of the Email class</returns>
-    public Mailable<T> CC(IEnumerable<Address> mailAddresses)
+    public Mail<T> CC(IEnumerable<Address> mailAddresses)
     {
         foreach (var address in mailAddresses)
         {
@@ -84,7 +81,7 @@ public abstract class Mailable<T> where T: Mailable<T>, new()
     /// <param name="emailAddress">Email address of bcc</param>
     /// <param name="name">Name of bcc</param>
     /// <returns>Instance of the Email class</returns>
-    public Mailable<T> BCC(string emailAddress, string name = "")
+    public Mail<T> BCC(string emailAddress, string name = "")
     {
         Data.BccAddresses.Add(new Address(emailAddress, name));
         return this;
@@ -95,7 +92,7 @@ public abstract class Mailable<T> where T: Mailable<T>, new()
     /// </summary>
     /// <param name="mailAddresses">List of recipients to BCC</param>
     /// <returns>Instance of the Email class</returns>
-    public Mailable<T> BCC(IEnumerable<Address> mailAddresses)
+    public Mail<T> BCC(IEnumerable<Address> mailAddresses)
     {
         foreach (var address in mailAddresses)
         {
@@ -109,7 +106,7 @@ public abstract class Mailable<T> where T: Mailable<T>, new()
     /// </summary>
     /// <param name="address">The ReplyTo Address</param>
     /// <returns></returns>
-    public Mailable<T> ReplyTo(string address)
+    public Mail<T> ReplyTo(string address)
     {
         Data.ReplyToAddresses.Add(new Address(address));
 
@@ -122,7 +119,7 @@ public abstract class Mailable<T> where T: Mailable<T>, new()
     /// <param name="address">The ReplyTo Address</param>
     /// <param name="name">The Display Name of the ReplyTo</param>
     /// <returns></returns>
-    public Mailable<T> ReplyTo(string address, string name)
+    public Mail<T> ReplyTo(string address, string name)
     {
         Data.ReplyToAddresses.Add(new Address(address, name));
 
@@ -134,7 +131,7 @@ public abstract class Mailable<T> where T: Mailable<T>, new()
     /// </summary>
     /// <param name="subject">email subject</param>
     /// <returns>Instance of the Email class</returns>
-    public Mailable<T> Subject(string subject)
+    public Mail<T> Subject(string subject)
     {
         Data.Subject = subject;
         return this;
@@ -143,7 +140,7 @@ public abstract class Mailable<T> where T: Mailable<T>, new()
     /// <summary>
     /// Marks the email as High Priority
     /// </summary>
-    public Mailable<T> HighPriority()
+    public Mail<T> HighPriority()
     {
         Data.Priority = Priority.High;
         return this;
@@ -152,7 +149,7 @@ public abstract class Mailable<T> where T: Mailable<T>, new()
     /// <summary>
     /// Marks the email as Low Priority
     /// </summary>
-    public Mailable<T> LowPriority()
+    public Mail<T> LowPriority()
     {
         Data.Priority = Priority.Low;
         return this;
@@ -163,7 +160,7 @@ public abstract class Mailable<T> where T: Mailable<T>, new()
     /// </summary>
     /// <param name="attachment">The Attachment to add</param>
     /// <returns>Instance of the Email class</returns>
-    public Mailable<T> Attach(Attachment attachment)
+    public Mail<T> Attach(Attachment attachment)
     {
         if (!Data.Attachments.Contains(attachment))
         {
@@ -178,7 +175,7 @@ public abstract class Mailable<T> where T: Mailable<T>, new()
     /// </summary>
     /// <param name="attachments">The List of Attachments to add</param>
     /// <returns>Instance of the Email class</returns>
-    public Mailable<T> Attach(IEnumerable<Attachment> attachments)
+    public Mail<T> Attach(IEnumerable<Attachment> attachments)
     {
         foreach (var attachment in attachments.Where(attachment => !Data.Attachments.Contains(attachment)))
         {
@@ -187,7 +184,7 @@ public abstract class Mailable<T> where T: Mailable<T>, new()
         return this;
     }
 
-    public Mailable<T> AttachFromFilename(string filename,  string contentType = null, string attachmentName = null)
+    public Mail<T> AttachFromFilename(string filename,  string contentType = null, string attachmentName = null)
     {
         var stream = File.OpenRead(filename);
         Attach(new Attachment
@@ -205,17 +202,22 @@ public abstract class Mailable<T> where T: Mailable<T>, new()
     /// </summary>
     /// <param name="tag">Tag name, max 128 characters, ASCII only</param>
     /// <returns>Instance of the Email class</returns>
-    public Mailable<T> Tag(string tag)
+    public Mail<T> Tag(string tag)
     {
         Data.Tags.Add(tag);
 
         return this;
     }
 
-    public Mailable<T> Header(string header, string body)
+    public Mail<T> Header(string header, string body)
     {
         Data.Headers.Add(header, body);
 
         return this;
+    }
+    
+    public EmailData GetEmailData()
+    {
+        return Data;
     }
 }

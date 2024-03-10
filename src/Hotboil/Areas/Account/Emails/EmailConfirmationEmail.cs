@@ -2,9 +2,14 @@
 
 namespace Hotboil.Areas.Account.Emails;
 
-public class EmailConfirmationEmail : Mailable<EmailConfirmationEmail>
+public class EmailConfirmationEmail : Mail<EmailConfirmationEmail>
 {
-    
+    public override string GetSubject() => "Confirm your email";
+
+    public override string GetTemplate()
+    {
+        throw new NotImplementedException();
+    }
 }
 
 public class Test
@@ -12,6 +17,6 @@ public class Test
     public Test()
     {
         var email = new EmailConfirmationEmail();
-        email.To("ss").Body()
+        email.To("ss");
     }
 }

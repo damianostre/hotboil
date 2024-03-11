@@ -6,7 +6,7 @@ public class EmailConfirmationEmail : Mail<EmailConfirmationEmail>
 {
     public override string GetSubject() => "Confirm your email";
 
-    public override string GetTemplate()
+    public override EmailTemplateInfo GetTemplate()
     {
         throw new NotImplementedException();
     }

@@ -7,7 +7,7 @@ public abstract class Mail<T> where T : Mail<T>, new()
     protected EmailData Data { get; } = new();
     
     public abstract string GetSubject();
-    public abstract string GetTemplate();
+    public abstract EmailTemplateInfo GetTemplate();
     
     /// <summary>
     /// Adds all recipients in list to email

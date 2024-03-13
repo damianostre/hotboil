@@ -14,8 +14,6 @@ public class MailerService : IMailerService
         {
             Data = mail.GetEmailData()
         };
-        
-        
 
         fluentEmail.Subject(mail.GetSubject());
         var template = mail.GetTemplate();

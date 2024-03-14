@@ -9,6 +9,8 @@ public abstract class Mail<T> where T : Mail<T>, new()
     public abstract string GetSubject();
     public abstract EmailTemplateInfo GetTemplate();
     
+    public virtual Address? GetFrom() => null;
+    
     /// <summary>
     /// Adds all recipients in list to email
     /// </summary>

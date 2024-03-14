@@ -1,33 +1,48 @@
 ﻿using FluentEmail.Core;
 using FluentEmail.Core.Interfaces;
+using FluentEmail.Core.Models;
+using Microsoft.Extensions.Options;
 
 namespace Hotboil.Mailer;
 
-public class MailerService : IMailerService
+public class MailerService(ISender sender, ITemplateRenderer renderer, IOptions<MailerOptions>? options)
+    : IMailerService
 {
-    private readonly ISender _sender;
-    private readonly ITemplateRenderer _renderer;
+    private readonly MailerOptions _options = options?.Value ?? new MailerOptions();
 
-    public async Task SendAsync<T>(T mail) where T : Mail<T>, new()
+    public Task SendAsync<T>(T mail, CancellationToken token = default) where T : Mail<T>, new()
     {
-        var fluentEmail = new Email(_renderer, _sender)
+        var fluentEmail = new Email(renderer, sender)
         {
             Data = mail.GetEmailData()
         };
 
         fluentEmail.Subject(mail.GetSubject());
-        var template = mail.GetTemplate();
+        if (fluentEmail.Data.FromAddress is null)
+        {
+            var from = mail.GetFrom() ?? new Address(_options.FromEmail, _options.FromName);
+            fluentEmail.SetFrom(from.EmailAddress, from.Name);
+        }
         
-    }
-
-    public MailerService(ISender sender, ITemplateRenderer renderer)
-    {
-        _sender = sender;
-        _renderer = renderer;
+        var template = mail.GetTemplate();
+        if (template is FileEmailTemplateInfo fileTemplate)
+        {
+            fluentEmail.UsingTemplateFromFile(fileTemplate.Path, mail, fileTemplate.IsHtml);
+        }
+        else if (template is EmbeddedEmailTemplateInfo embeddedTemplate)
+        {
+            fluentEmail.UsingTemplateFromEmbedded(
+                embeddedTemplate.Name, mail, embeddedTemplate.Assembly, embeddedTemplate.IsHtml);
+        }
+        else
+        {
+            throw new InvalidOperationException("Unknown template type");
+        }
+        
+        return sender.SendAsync(fluentEmail, token);
     }
 } 
 
 public interface IMailerService
 {
-    
 }

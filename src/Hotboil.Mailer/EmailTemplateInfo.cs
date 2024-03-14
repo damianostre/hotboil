@@ -1,16 +1,19 @@
-﻿namespace Hotboil.Mailer;
+﻿using System.Reflection;
+
+namespace Hotboil.Mailer;
 
 public abstract class EmailTemplateInfo
 {
-    public bool IsHtml { get; set; }
+    public bool IsHtml { get; set; } = true;
 }
 
 public class FileEmailTemplateInfo : EmailTemplateInfo
 {
-    public string Path { get; set; }    
+    public required string Path { get; set; }    
 }
 
 public class EmbeddedEmailTemplateInfo : EmailTemplateInfo
 {
-    public string Name { get; set; }
+    public required string Name { get; set; }
+    public required Assembly Assembly { get; set; }
 }

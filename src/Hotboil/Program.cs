@@ -1,4 +1,5 @@
 using Hotboil.Data;
+using Hotboil.Mailer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -33,6 +34,7 @@ builder.Services.AddIdentityCore<IdentityUser>(o =>
     .AddDefaultTokenProviders()
     .AddSignInManager();
 
+builder.Services.AddMailer();
 builder.Services.AddRazorPages();
 
 var app = builder.Build();

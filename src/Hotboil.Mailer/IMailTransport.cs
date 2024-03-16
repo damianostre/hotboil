@@ -1,6 +1,6 @@
 ﻿namespace Hotboil.Mailer;
 
-public class IMailTransport
+public interface IMailTransport
 {
     
 }

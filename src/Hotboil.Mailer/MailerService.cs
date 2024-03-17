@@ -1,23 +1,21 @@
 ﻿using FluentEmail.Core;
-using FluentEmail.Core.Interfaces;
-using FluentEmail.Core.Models;
 using Microsoft.Extensions.Options;
 
 namespace Hotboil.Mailer;
 
-public class MailerService(ISender sender, ITemplateRenderer renderer, IOptions<MailerOptions>? options)
+public class MailerService(IMailTransport sender, ITemplateEngine renderer, IOptions<MailerOptions>? options)
     : IMailerService
 {
     private readonly MailerOptions _options = options?.Value ?? new MailerOptions();
 
     public Task SendAsync<T>(T mail, CancellationToken token = default) where T : Mail<T>, new()
     {
-        var fluentEmail = new Email(renderer, sender)
-        {
-            Data = mail.GetEmailData()
-        };
-
-        fluentEmail.Subject(mail.GetSubject());
+        // var fluentEmail = new Email(renderer, sender)
+        // {
+        //     Data = mail.GetEmailData()
+        // };
+        var data = mail.GetEmailData();
+        data.Subject = mail.GetSubject();
         if (fluentEmail.Data.FromAddress is null)
         {
             var from = mail.GetFrom() ?? new Address(_options.FromEmail, _options.FromName);

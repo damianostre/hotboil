@@ -30,59 +30,12 @@ public class SmtpMailTransport : IMailTransport
     /// <returns>A response with any errors and a success boolean.</returns>
     /// <param name="email">Email.</param>
     /// <param name="token">Cancellation Token.</param>
-    public SendResponse Send<T>(T email, CancellationToken? token = null) where T : Mail<T>, new()
+    public SendResponse Send(EmailData email, CancellationToken? token = null)
     {
-        var response = new SendResponse();
-        var message = CreateMailMessage(email);
-
-        if (token?.IsCancellationRequested ?? false)
-        {
-            response.ErrorMessages.Add("Message was cancelled by cancellation token.");
-            return response;
-        }
-
-        try
-        {
-            if (_smtpClientOptions.UsePickupDirectory)
-            {
-                SaveToPickupDirectory(message, _smtpClientOptions.MailPickupDirectory).Wait();
-                return response;
-            }
-
-            using var client = new SmtpClient();
-            if (_smtpClientOptions.SocketOptions.HasValue)
-            {
-                client.Connect(
-                    _smtpClientOptions.Server,
-                    _smtpClientOptions.Port,
-                    _smtpClientOptions.SocketOptions.Value,
-                    token.GetValueOrDefault());
-            }
-            else
-            {
-                client.Connect(
-                    _smtpClientOptions.Server,
-                    _smtpClientOptions.Port,
-                    _smtpClientOptions.UseSsl,
-                    token.GetValueOrDefault());
-            }
-
-            // Note: only needed if the SMTP server requires authentication
-            if (_smtpClientOptions.RequiresAuthentication)
-            {
-                client.Authenticate(_smtpClientOptions.User, _smtpClientOptions.Password,
-                    token.GetValueOrDefault());
-            }
-
-            client.Send(message, token.GetValueOrDefault());
-            client.Disconnect(true, token.GetValueOrDefault());
-        }
-        catch (Exception ex)
-        {
-            response.ErrorMessages.Add(ex.Message);
-        }
-
-        return response;
+        return SendAsync(email, token)
+            .ConfigureAwait(false)
+            .GetAwaiter()
+            .GetResult();
     }
 
     /// <summary>
@@ -91,7 +44,7 @@ public class SmtpMailTransport : IMailTransport
     /// <returns>A response with any errors and a success boolean.</returns>
     /// <param name="email">Email.</param>
     /// <param name="token">Cancellation Token.</param>
-    public async Task<SendResponse> SendAsync<T>(T email, CancellationToken? token = null) where T : Mail<T>, new()
+    public async Task<SendResponse> SendAsync(EmailData email, CancellationToken? token = null)
     {
         var response = new SendResponse();
         var message = CreateMailMessage(email);
@@ -170,38 +123,37 @@ public class SmtpMailTransport : IMailTransport
     /// </summary>
     /// <returns>The mail message.</returns>
     /// <param name="email">Email data.</param>
-    private MimeMessage CreateMailMessage<T>(T email) where T : Mail<T>, new()
+    private MimeMessage CreateMailMessage(EmailData email)
     {
-        var data = email.GetEmailData();
         var message = new MimeMessage();
 
         // fixes https://github.com/lukencode/FluentEmail/issues/228
         // if for any reason, subject header is not added, add it else update it.
         if (!message.Headers.Contains(HeaderId.Subject))
-            message.Headers.Add(HeaderId.Subject, Encoding.UTF8, data.Subject ?? string.Empty);
+            message.Headers.Add(HeaderId.Subject, Encoding.UTF8, email.Subject ?? string.Empty);
         else
-            message.Headers[HeaderId.Subject] = data.Subject ?? string.Empty;
+            message.Headers[HeaderId.Subject] = email.Subject ?? string.Empty;
 
         message.Headers.Add(HeaderId.Encoding, Encoding.UTF8.EncodingName);
 
-        message.From.Add(new MailboxAddress(data.FromAddress.Name, data.FromAddress.EmailAddress));
+        message.From.Add(new MailboxAddress(email.FromAddress.Name, email.FromAddress.EmailAddress));
 
         var builder = new BodyBuilder();
-        if (!string.IsNullOrEmpty(data.PlaintextAlternativeBody))
+        if (!string.IsNullOrEmpty(email.PlaintextAlternativeBody))
         {
-            builder.TextBody = data.PlaintextAlternativeBody;
-            builder.HtmlBody = data.Body;
+            builder.TextBody = email.PlaintextAlternativeBody;
+            builder.HtmlBody = email.Body;
         }
-        else if (!data.IsHtml)
+        else if (!email.IsHtml)
         {
-            builder.TextBody = data.Body;
+            builder.TextBody = email.Body;
         }
         else
         {
-            builder.HtmlBody = data.Body;
+            builder.HtmlBody = email.Body;
         }
 
-        data.Attachments.ForEach(x =>
+        email.Attachments.ForEach(x =>
         {
             var attachment = builder.Attachments.Add(x.Filename, x.Data, ContentType.Parse(x.ContentType));
             attachment.ContentId = x.ContentId;
@@ -210,17 +162,17 @@ public class SmtpMailTransport : IMailTransport
 
         message.Body = builder.ToMessageBody();
 
-        foreach (var header in data.Headers)
+        foreach (var header in email.Headers)
         {
             message.Headers.Add(header.Key, header.Value);
         }
 
-        data.ToAddresses.ForEach(x => { message.To.Add(new MailboxAddress(x.Name, x.EmailAddress)); });
-        data.CcAddresses.ForEach(x => { message.Cc.Add(new MailboxAddress(x.Name, x.EmailAddress)); });
-        data.BccAddresses.ForEach(x => { message.Bcc.Add(new MailboxAddress(x.Name, x.EmailAddress)); });
-        data.ReplyToAddresses.ForEach(x => { message.ReplyTo.Add(new MailboxAddress(x.Name, x.EmailAddress)); });
+        email.ToAddresses.ForEach(x => { message.To.Add(new MailboxAddress(x.Name, x.EmailAddress)); });
+        email.CcAddresses.ForEach(x => { message.Cc.Add(new MailboxAddress(x.Name, x.EmailAddress)); });
+        email.BccAddresses.ForEach(x => { message.Bcc.Add(new MailboxAddress(x.Name, x.EmailAddress)); });
+        email.ReplyToAddresses.ForEach(x => { message.ReplyTo.Add(new MailboxAddress(x.Name, x.EmailAddress)); });
         
-        message.Priority = data.Priority switch
+        message.Priority = email.Priority switch
         {
             Priority.Low => MessagePriority.NonUrgent,
             Priority.Normal => MessagePriority.Normal,

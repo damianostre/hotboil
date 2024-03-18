@@ -1,40 +1,11 @@
 ﻿namespace Hotboil.Mailer;
 
-public class Address
+public record Address(string EmailAddress, string? Name = null)
 {
-    public string Name { get; set; }
-    public string EmailAddress { get; set; }
+    public string? Name { get; set; } = Name;
+    public string EmailAddress { get; set; } = EmailAddress;
 
-    public Address()
-    {            
-    }
-
-    public Address(string emailAddress, string name = null)
+    public Address(string emailAddress) : this(emailAddress, null)
     {
-        EmailAddress = emailAddress;
-        Name = name;
-    }
-
-    public override string ToString()
-    {
-        return Name == null ? EmailAddress : $"{Name} <{EmailAddress}>";
-    }
-
-    public override int GetHashCode()
-    {
-        return base.GetHashCode();
-    }
-
-    public override bool Equals(object obj)
-    {
-        if ((obj == null) || !this.GetType().Equals(obj.GetType()))
-        {
-            return false;
-        }
-        else
-        {
-            Address otherAddress = (Address)obj;
-            return this.EmailAddress == otherAddress.EmailAddress && this.Name == otherAddress.Name;
-        }
     }
 }

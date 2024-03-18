@@ -1,15 +1,13 @@
-﻿using FluentEmail.Core.Models;
-
-namespace Hotboil.Mailer;
+﻿namespace Hotboil.Mailer;
 
 public abstract class Mail<T> where T : Mail<T>, new()
 {
-    protected EmailData Data { get; } = new();
+    private EmailData Data { get; } = new();
     
+    public virtual Address? GetFromAddress() => null;
     public abstract string GetSubject();
-    public abstract EmailTemplateInfo GetTemplate();
-    
-    public virtual Address? GetFrom() => null;
+    public virtual MailContent? GetHtmlContent() => null;
+    public virtual MailContent? GetTextContent() => null;
     
     /// <summary>
     /// Adds all recipients in list to email

@@ -8,7 +8,7 @@ public class EmailConfirmationMail : Mail<EmailConfirmationMail>
     
     public override string GetSubject() => "Confirm your email";
 
-    public override EmailTemplateInfo GetTemplate()
+    public override EmailTemplateInfo GetContent()
     {
         return new FileEmailTemplateInfo
         {

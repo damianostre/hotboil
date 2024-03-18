@@ -10,24 +10,23 @@ public class MailerService(IMailTransport sender, ITemplateEngine renderer, IOpt
 
     public Task SendAsync<T>(T mail, CancellationToken token = default) where T : Mail<T>, new()
     {
-        // var fluentEmail = new Email(renderer, sender)
-        // {
-        //     Data = mail.GetEmailData()
-        // };
         var data = mail.GetEmailData();
         data.Subject = mail.GetSubject();
-        if (fluentEmail.Data.FromAddress is null)
+        data.FromAddress ??= mail.GetFromAddress() ?? (_options.FromEmail is not null
+            ? new Address(_options.FromEmail, _options.FromName)
+            : null);
+        
+        if (data.FromAddress is null)
         {
-            var from = mail.GetFrom() ?? new Address(_options.FromEmail, _options.FromName);
-            fluentEmail.SetFrom(from.EmailAddress, from.Name);
+            throw new InvalidOperationException("From address is not set");
         }
         
-        var template = mail.GetTemplate();
-        if (template is FileEmailTemplateInfo fileTemplate)
+        var template = mail.GetHtmlContent();
+        if (template is FileTemplateMailContent fileTemplate)
         {
-            fluentEmail.UsingTemplateFromFile(fileTemplate.Path, mail, fileTemplate.IsHtml);
+            new Email().PlaintextAlternativeUsingTemplate(fileTemplate.Path, mail, fileTemplate.IsHtml);
         }
-        else if (template is EmbeddedEmailTemplateInfo embeddedTemplate)
+        else if (template is EmbeddedFileMailContent embeddedTemplate)
         {
             fluentEmail.UsingTemplateFromEmbedded(
                 embeddedTemplate.Name, mail, embeddedTemplate.Assembly, embeddedTemplate.IsHtml);

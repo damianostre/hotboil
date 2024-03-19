@@ -21,20 +21,20 @@ public class MailerService(IMailTransport sender, ITemplateEngine renderer, IOpt
             throw new InvalidOperationException("From address is not set");
         }
         
-        var template = mail.GetHtmlContent();
-        if (template is FileTemplateMailContent fileTemplate)
-        {
-            new Email().PlaintextAlternativeUsingTemplate(fileTemplate.Path, mail, fileTemplate.IsHtml);
-        }
-        else if (template is EmbeddedFileMailContent embeddedTemplate)
-        {
-            fluentEmail.UsingTemplateFromEmbedded(
-                embeddedTemplate.Name, mail, embeddedTemplate.Assembly, embeddedTemplate.IsHtml);
-        }
-        else
-        {
-            throw new InvalidOperationException("Unknown template type");
-        }
+        // var template = mail.GetHtmlContent();
+        // if (template is FileTemplateMailContent fileTemplate)
+        // {
+        //     new Email().PlaintextAlternativeUsingTemplate(fileTemplate.Path, mail, fileTemplate.IsHtml);
+        // }
+        // else if (template is EmbeddedFileMailContent embeddedTemplate)
+        // {
+        //     fluentEmail.UsingTemplateFromEmbedded(
+        //         embeddedTemplate.Name, mail, embeddedTemplate.Assembly, embeddedTemplate.IsHtml);
+        // }
+        // else
+        // {
+        //     throw new InvalidOperationException("Unknown template type");
+        // }
         
         return sender.SendAsync(fluentEmail, token);
     }

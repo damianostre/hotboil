@@ -8,7 +8,7 @@ public class MailerService(IMailTransport sender, ITemplateEngine engine, IOptio
 {
     private readonly MailerOptions _options = options?.Value ?? new MailerOptions();
 
-    public async Task SendAsync<T>(T mail, CancellationToken token = default) where T : Mail<T>, new()
+    public async Task<SendResponse> SendAsync<T>(T mail, CancellationToken token = default) where T : Mail<T>, new()
     {
         var data = mail.GetEmailData();
         data.Subject = mail.GetSubject();
@@ -21,28 +21,46 @@ public class MailerService(IMailTransport sender, ITemplateEngine engine, IOptio
             throw new InvalidOperationException("From address is not set");
         }
         
-        var htmlContent = mail.GetHtmlContent();
-        var textContent = mail.GetTextContent();
+        var html = await GetContent(mail, mail.GetHtmlContent());
+        var text = await GetContent(mail, mail.GetTextContent());
+
+        data.Body = html ?? text;
+        data.PlaintextAlternativeBody = html is not null ? text : null;
+        data.IsHtml = html is not null;
+
+        return await sender.SendAsync(data, token);
+    }
+    
+    private async Task<string?> GetContent<T>(T mail, MailContent? mailContent) where T : Mail<T>, new()
+    {
+        if (mailContent is null) return null;
         
-        if (htmlContent is FileTemplateMailContent fileTemplate)
+        if (mailContent is FileTemplateMailContent fileTemplate)
         {
-            data.Body = await engine.ParseAsync(fileTemplate.Path, mail);
-            data.IsHtml = true;
+            if (File.Exists(fileTemplate.Path) is false)
+            {
+                throw new InvalidOperationException("Template not found");
+            }
+            
+            using var reader = new StreamReader(File.OpenRead(fileTemplate.Path));
+            var template = await reader.ReadToEndAsync();
+
+            return await engine.ParseAsync(template, mail);
         }
-        else if (htmlContent is EmbeddedTemplateMailContent embeddedTemplate)
+
+        if (mailContent is EmbeddedTemplateMailContent embeddedTemplate)
         {
             var template = EmbeddedResourceHelper.GetResourceAsString(
                 embeddedTemplate.Assembly, embeddedTemplate.Name);
-            var result = await engine.ParseAsync(template, mail);
-            data.IsHtml = true;
-            data.Body = result;
+            if (template is null)
+            {
+                throw new InvalidOperationException("Template not found");
+            }
+            
+            return await engine.ParseAsync(template, mail);
         }
-        else
-        {
-            throw new InvalidOperationException("Unknown template type");
-        }
-        
-        return sender.SendAsync(fluentEmail, token);
+
+        throw new InvalidOperationException("Unknown template type");
     }
 } 
 

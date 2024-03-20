@@ -1,6 +1,4 @@
-﻿using FluentEmail.Core.Models;
-
-namespace Hotboil.Mailer;
+﻿namespace Hotboil.Mailer;
 
 public interface IMailTransport
 {

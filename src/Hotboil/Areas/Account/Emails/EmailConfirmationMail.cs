@@ -8,13 +8,12 @@ public class EmailConfirmationMail : Mail<EmailConfirmationMail>
     
     public override string GetSubject() => "Confirm your email";
 
-    public override EmailTemplateInfo GetContent()
+    public override MailContent? GetTextContent()
     {
-        return new FileEmailTemplateInfo
+        return new StringMailContent
         {
-            Path = "EmailConfirmation.html",
+            Content = $"Please confirm your email by clicking this link: {ConfirmationLink}"
         };
-    
     }
 }
 

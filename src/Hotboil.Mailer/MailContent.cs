@@ -6,6 +6,11 @@ public abstract class MailContent
 {
 }
 
+public class StringMailContent : MailContent
+{
+    public required string Content { get; set; }
+}
+
 public class FileTemplateMailContent : MailContent
 {
     public required string Path { get; set; }

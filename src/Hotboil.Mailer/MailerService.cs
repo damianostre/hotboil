@@ -1,5 +1,4 @@
-﻿using FluentEmail.Core;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
 
 namespace Hotboil.Mailer;
 

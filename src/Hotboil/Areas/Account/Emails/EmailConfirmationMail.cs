@@ -16,12 +16,3 @@ public class EmailConfirmationMail : Mail<EmailConfirmationMail>
         };
     }
 }
-
-public class Test
-{
-    public Test()
-    {
-        var email = new EmailConfirmationMail();
-        email.To("ss");
-    }
-}

@@ -1,6 +1,4 @@
-﻿using FluentEmail.Core.Models;
-
-namespace Hotboil.Mailer.Transports.Sandbox;
+﻿namespace Hotboil.Mailer.Transports.Sandbox;
 
 public class SandboxMailTransport(string directory) : IMailTransport
 {

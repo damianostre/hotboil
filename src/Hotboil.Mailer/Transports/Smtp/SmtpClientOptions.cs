@@ -6,6 +6,8 @@ namespace Hotboil.Mailer.Transports.Smtp;
 
 public class SmtpClientOptions
 {
+    public static string SectionName => "Mailer:Smtp";
+    
     public string Server { get; set; } = string.Empty;
     public int Port { get; set; } = 25;
     public string User { get; set; } = string.Empty;

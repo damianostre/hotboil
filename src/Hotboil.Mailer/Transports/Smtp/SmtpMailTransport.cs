@@ -1,9 +1,8 @@
 ﻿// https://github.com/lukencode/FluentEmail/blob/master/src/Senders/FluentEmail.MailKit/MailKitSender.cs
 
 using System.Text;
-using FluentEmail.Core;
-using FluentEmail.Core.Models;
 using MailKit.Net.Smtp;
+using Microsoft.Extensions.Options;
 using MimeKit;
 
 namespace Hotboil.Mailer.Transports.Smtp;
@@ -19,9 +18,9 @@ public class SmtpMailTransport : IMailTransport
     /// Creates a sender that uses the given SmtpClientOptions when sending with MailKit. Since the client is internal this will dispose of the client.
     /// </summary>
     /// <param name="smtpClientOptions">The SmtpClientOptions to use to create the MailKit client</param>
-    public SmtpMailTransport(SmtpClientOptions smtpClientOptions)
+    public SmtpMailTransport(IOptions<SmtpClientOptions> smtpClientOptions)
     {
-        _smtpClientOptions = smtpClientOptions;
+        _smtpClientOptions = smtpClientOptions.Value;
     }
 
     /// <summary>

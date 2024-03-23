@@ -1,4 +1,5 @@
-﻿using Hotboil.Mailer.Transports.Smtp;
+﻿using Hotboil.Mailer.Transports;
+using Hotboil.Mailer.Transports.Smtp;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -27,13 +28,14 @@ public class MailerBuilder
     }
 }
 
-public class MailerBuilderExtensions
+public static class MailerBuilderExtensions
 {
-    public static MailerBuilder AddSmtp(this MailerBuilder builder, Action<SmtpClientOptions> configure)
+    public static MailerBuilder AddSmtp(this MailerBuilder builder, Action<SmtpClientOptions>? configure = null)
     {
-        builder.Services.AddOptions<SmtpClientOptions>().BindConfiguration(SmtpClientOptions.SectionName);   
-        builder.Services.TryAdd(ServiceDescriptor.Scoped<IMailTransport>(
-            _ => new SmtpMailTransport()));
+        builder.Services.AddOptions<SmtpClientOptions>()
+            .BindConfiguration(SmtpClientOptions.SectionName)
+            .Configure(configure ?? (_ => { }));
+        builder.Services.TryAddScoped<IMailTransport, SmtpMailTransport>();
         return builder;
     }
 }

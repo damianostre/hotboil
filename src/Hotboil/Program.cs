@@ -34,7 +34,7 @@ builder.Services.AddIdentityCore<IdentityUser>(o =>
     .AddDefaultTokenProviders()
     .AddSignInManager();
 
-builder.Services.AddMailer();
+builder.Services.AddMailer().AddSmtp();
 builder.Services.AddRazorPages();
 
 var app = builder.Build();

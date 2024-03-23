@@ -1,17 +1,12 @@
 ﻿namespace Hotboil.Mailer.Transports.Sandbox;
 
-public class SandboxMailTransport(string directory) : IMailTransport
+public class SandboxMailTransport(string directory)
 {
-    public SendResponse Send(EmailData email, CancellationToken? token = null)
-    {
-        return SendAsync(email, token).GetAwaiter().GetResult();
-    }
-
-    public async Task<SendResponse> SendAsync(EmailData email, CancellationToken? token = null)
+    public async Task<(SendResponse response, bool handled)> TryHandle(EmailData email, CancellationToken? token = null)
     {
         var response = new SendResponse();
         await SaveEmailToDisk(email);
-        return response;
+        return (response, true);
     }
 
     private async Task<bool> SaveEmailToDisk(EmailData email)

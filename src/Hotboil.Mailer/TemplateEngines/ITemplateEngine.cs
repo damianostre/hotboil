@@ -1,4 +1,4 @@
-﻿namespace Hotboil.Mailer;
+﻿namespace Hotboil.Mailer.TemplateEngines;
 
 public interface ITemplateEngine
 {

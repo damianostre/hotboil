@@ -50,7 +50,7 @@ public class SmtpMailTransport : IMailTransport
 
         if (token?.IsCancellationRequested ?? false)
         {
-            response.ErrorMessages.Add("Message was cancelled by cancellation token.");
+            response.ErrorMessage = "Message was cancelled by cancellation token.";
             return response;
         }
 
@@ -92,7 +92,7 @@ public class SmtpMailTransport : IMailTransport
         }
         catch (Exception ex)
         {
-            response.ErrorMessages.Add(ex.Message);
+            response.ErrorMessage = ex.Message;
         }
 
         return response;

@@ -7,11 +7,13 @@ namespace Hotboil.Mailer;
 
 public static class ServicesExtensions
 {
-    public static MailerBuilder AddMailer(this IServiceCollection services)
+    public static MailerBuilder AddMailer(this IServiceCollection services, Action<MailerOptions>? configure = null)
     {
         var mailerBuilder = new MailerBuilder(services);
         
-        services.AddOptions<MailerOptions>().BindConfiguration(MailerOptions.SectionName);
+        services.AddOptions<MailerOptions>()
+            .BindConfiguration(MailerOptions.SectionName)
+            .Configure(configure ?? (_ => { }));
         services.AddTransient<IMailerService, MailerService>();
         
         return mailerBuilder;

@@ -3,6 +3,8 @@
 public class SendResponse
 {
     public string? MessageId { get; set; }
-    public IList<string> ErrorMessages { get; set; } = new List<string>();
-    public bool Successful => !ErrorMessages.Any();
+    public string? Response { get; set; }
+    public string? ErrorMessage { get; set; }
+    public string? Comment { get; set; }
+    public bool Success => ErrorMessage == null;
 }

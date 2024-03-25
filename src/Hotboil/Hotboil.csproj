@@ -17,7 +17,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Areas\Account\Pages\" />
     <Folder Include="Data\Migrations\" />
     <Folder Include="wwwroot\lib\" />
     <Folder Include="wwwroot\lib\bootstrap\" />

@@ -1,6 +1,7 @@
 ﻿#nullable disable
 
 using System.Text;
+using Hotboil.Mailer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
@@ -10,17 +11,8 @@ using Microsoft.AspNetCore.WebUtilities;
 
 namespace Hotboil.Areas.Auth.Pages;
 
-public class SignUpConfirmationModel : PageModel
+public class SignUpConfirmationModel(UserManager<IdentityUser> userManager) : PageModel
 {
-    private readonly UserManager<IdentityUser> _userManager;
-    private readonly IEmailSender _sender;
-
-    public SignUpConfirmationModel(UserManager<IdentityUser> userManager, IEmailSender sender)
-    {
-        _userManager = userManager;
-        _sender = sender;
-    }
-
     /// <summary>
     ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
     ///     directly from your code. This API may change or be removed in future releases.
@@ -47,7 +39,7 @@ public class SignUpConfirmationModel : PageModel
         }
         returnUrl = returnUrl ?? Url.Content("~/");
 
-        var user = await _userManager.FindByEmailAsync(email);
+        var user = await userManager.FindByEmailAsync(email);
         if (user == null)
         {
             return NotFound($"Unable to load user with email '{email}'.");
@@ -58,8 +50,8 @@ public class SignUpConfirmationModel : PageModel
         DisplayConfirmAccountLink = true;
         if (DisplayConfirmAccountLink)
         {
-            var userId = await _userManager.GetUserIdAsync(user);
-            var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            var userId = await userManager.GetUserIdAsync(user);
+            var code = await userManager.GenerateEmailConfirmationTokenAsync(user);
             code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
             EmailConfirmationUrl = Url.Page(
                 "/Account/ConfirmEmail",

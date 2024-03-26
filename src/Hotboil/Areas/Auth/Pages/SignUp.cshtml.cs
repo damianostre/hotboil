@@ -1,8 +1,9 @@
-﻿#nullable disable
-
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.Text;
+using System.Text.Encodings.Web;
+using Hotboil.Areas.Account.Emails;
 using Hotboil.Areas.Identity.Pages.Account;
+using Hotboil.Mailer;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -18,18 +19,21 @@ public class SignUpModel : PageModel
     private readonly IUserStore<IdentityUser> _userStore;
     private readonly IUserEmailStore<IdentityUser> _emailStore;
     private readonly ILogger<SignUpModel> _logger;
+    private readonly IMailerService _mailerService;
 
     public SignUpModel(
         UserManager<IdentityUser> userManager,
         IUserStore<IdentityUser> userStore,
         SignInManager<IdentityUser> signInManager,
-        ILogger<SignUpModel> logger)
+        ILogger<SignUpModel> logger,
+        IMailerService mailerService)
     {
         _userManager = userManager;
         _userStore = userStore;
         _emailStore = GetEmailStore();
         _signInManager = signInManager;
         _logger = logger;
+        _mailerService = mailerService;
     }
     
     [BindProperty]
@@ -89,9 +93,16 @@ public class SignUpModel : PageModel
                     values: new { area = "Identity", userId = userId, code = code, returnUrl = returnUrl },
                     protocol: Request.Scheme);
 
+                
                 // await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
-                //     $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+                //     $"Please confirm your account by <a href='{}'>clicking here</a>.");
 
+                var email = new EmailConfirmationMail
+                {
+                    ConfirmationLink = HtmlEncoder.Default.Encode(callbackUrl)
+                };
+                await _mailerService.SendAsync(email.To(Input.Email));
+                
                 if (_userManager.Options.SignIn.RequireConfirmedAccount)
                 {
                     return RedirectToPage("RegisterConfirmation", new { email = Input.Email, returnUrl = returnUrl });

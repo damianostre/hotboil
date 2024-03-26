@@ -2,7 +2,19 @@
 @model ConfirmEmailModel
 @{
     ViewData["Title"] = "Confirm email";
+    var statusMessageClass = !Model.Success ? "success" : "danger";
 }
 
 <h1>@ViewData["Title"]</h1>
-<partial name="_StatusMessage" model="Model.StatusMessage" />
+
+<div class="alert alert-@statusMessageClass alert-dismissible" role="alert">
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    @if(Model.Success)
+    {
+        @: Your email has not been confirmed. <a asp-page="./SignIn" asp-area="Auth">Sign in</a>
+    }
+    else
+    {
+        @: Error occurred confirming your email. Please try again later.
+    }
+</div>

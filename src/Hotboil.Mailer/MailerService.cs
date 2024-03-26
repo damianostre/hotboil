@@ -121,4 +121,5 @@ public class MailerService(
 
 public interface IMailerService
 {
+    Task<SendResponse> SendAsync<T>(T mail, CancellationToken token = default) where T : Mail<T>, new();
 }

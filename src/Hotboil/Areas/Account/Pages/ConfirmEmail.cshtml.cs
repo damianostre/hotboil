@@ -8,40 +8,38 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 
-namespace Hotboil.Areas.Account.Pages
+namespace Hotboil.Areas.Account.Pages;
+
+public class ConfirmEmailModel(UserManager<IdentityUser> userManager, ILogger<ConfirmEmailModel> logger)
+    : PageModel
 {
-    public class ConfirmEmailModel : PageModel
+    [TempData]
+    public bool Success { get; set; }
+    public async Task<IActionResult> OnGetAsync(string userId, string code)
     {
-        private readonly UserManager<IdentityUser> _userManager;
-
-        public ConfirmEmailModel(UserManager<IdentityUser> userManager)
+        if (userId == null || code == null)
         {
-            _userManager = userManager;
+            return Redirect("/");
         }
 
-        /// <summary>
-        ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
-        /// </summary>
-        [TempData]
-        public string StatusMessage { get; set; }
-        public async Task<IActionResult> OnGetAsync(string userId, string code)
+        var user = await userManager.FindByIdAsync(userId);
+        if (user == null)
         {
-            if (userId == null || code == null)
-            {
-                return RedirectToPage("/Index");
-            }
-
-            var user = await _userManager.FindByIdAsync(userId);
-            if (user == null)
-            {
-                return NotFound($"Unable to load user with ID '{userId}'.");
-            }
-
-            code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(code));
-            var result = await _userManager.ConfirmEmailAsync(user, code);
-            StatusMessage = result.Succeeded ? "Thank you for confirming your email." : "Error confirming your email.";
-            return Page();
+            return NotFound($"Unable to load user with ID '{userId}'.");
         }
+
+        code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(code));
+        var result = await userManager.ConfirmEmailAsync(user, code);
+        if (!result.Succeeded)
+        {
+            var errors = result.Errors.Select(e => e.Description);
+            logger.LogInformation(
+                "Error confirming email for user with ID:{UserId}. Errors: {Errors}", 
+                userId,
+                errors);
+        }
+
+        Success = result.Succeeded;
+        return Page();
     }
 }

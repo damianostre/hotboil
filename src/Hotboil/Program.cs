@@ -34,7 +34,16 @@ builder.Services.AddIdentityCore<IdentityUser>(o =>
     .AddDefaultTokenProviders()
     .AddSignInManager();
 
-builder.Services.AddMailer().AddSmtp();
+builder.Services
+    .AddMailer()
+    .AddSmtp()
+    .AddSimpleTemplates();
+
+builder.Services.Configure<MailerOptions>(opts =>
+{
+    opts.FromEmail = "fromfromfrom@test.pl";
+});
+
 builder.Services.AddRazorPages();
 
 var app = builder.Build();

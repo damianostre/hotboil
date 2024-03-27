@@ -1,4 +1,7 @@
-﻿using Hotboil.Mailer.Transports;
+﻿using Hotboil.Mailer.TemplateEngines;
+using Hotboil.Mailer.TemplateEngines.SimpleTemplateEngine;
+using Hotboil.Mailer.Transports;
+using Hotboil.Mailer.Transports.Sandbox;
 using Hotboil.Mailer.Transports.Smtp;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -14,6 +17,7 @@ public static class ServicesExtensions
         services.AddOptions<MailerOptions>()
             .BindConfiguration(MailerOptions.SectionName)
             .Configure(configure ?? (_ => { }));
+        services.AddScoped<SandboxMailTransport>();
         services.AddTransient<IMailerService, MailerService>();
         
         return mailerBuilder;
@@ -38,6 +42,12 @@ public static class MailerBuilderExtensions
             .BindConfiguration(SmtpClientOptions.SectionName)
             .Configure(configure ?? (_ => { }));
         builder.Services.TryAddScoped<IMailTransport, SmtpMailTransport>();
+        return builder;
+    }
+    
+    public static MailerBuilder AddSimpleTemplates(this MailerBuilder builder)
+    {
+        builder.Services.TryAddScoped<ITemplateEngine, SimpleTemplateEngine>();
         return builder;
     }
 }

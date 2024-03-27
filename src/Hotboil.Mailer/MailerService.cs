@@ -15,7 +15,7 @@ public class MailerService(
 {
     private readonly MailerOptions _options = options.Value;
 
-    public async Task<SendResponse> SendAsync<T>(T mail, CancellationToken token = default) where T : Mail<T>, new()
+    public async Task<SendResponse> SendAsync<T>(Mail<T> mail, CancellationToken token = default) where T : Mail<T>, new()
     {
         var data = mail.GetEmailData();
         data.Subject = mail.GetSubject();
@@ -85,7 +85,7 @@ public class MailerService(
         return (null, null);
     }
 
-    private async Task<string?> GetContent<T>(T mail, MailContent? mailContent) where T : Mail<T>, new()
+    private async Task<string?> GetContent<T>(Mail<T> mail, MailContent? mailContent) where T : Mail<T>, new()
     {
         if (mailContent is null) return null;
         
@@ -121,5 +121,5 @@ public class MailerService(
 
 public interface IMailerService
 {
-    Task<SendResponse> SendAsync<T>(T mail, CancellationToken token = default) where T : Mail<T>, new();
+    Task<SendResponse> SendAsync<T>(Mail<T> mail, CancellationToken token = default) where T : Mail<T>, new();
 }

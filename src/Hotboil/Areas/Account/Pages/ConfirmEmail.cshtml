@@ -11,7 +11,7 @@
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     @if(Model.Success)
     {
-        @: Your email has not been confirmed. <a asp-page="./SignIn" asp-area="Auth">Sign in</a>
+        @: Your email has been confirmed. <a asp-page="./SignIn" asp-area="Auth">Sign in</a>
     }
     else
     {

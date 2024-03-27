@@ -68,59 +68,54 @@ public class SignUpModel : PageModel
         ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
     }
 
-    public async Task<IActionResult> OnPostAsync(string returnUrl = null)
+    public async Task<IActionResult> OnPostAsync(string? returnUrl = null)
     {
         returnUrl ??= Url.Content("~/");
         ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
-        if (ModelState.IsValid)
+        if (!ModelState.IsValid)
         {
-            var user = CreateUser();
+            return Page();
+        }
+        
+        var user = CreateUser();
+        await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
+        await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
+        var result = await _userManager.CreateAsync(user, Input.Password);
 
-            await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
-            await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
-            var result = await _userManager.CreateAsync(user, Input.Password);
-
-            if (result.Succeeded)
-            {
-                _logger.LogInformation("User created a new account with password.");
-
-                var userId = await _userManager.GetUserIdAsync(user);
-                var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-                var callbackUrl = Url.Page(
-                    "/Account/ConfirmEmail",
-                    pageHandler: null,
-                    values: new { area = "Identity", userId = userId, code = code, returnUrl = returnUrl },
-                    protocol: Request.Scheme);
-
-                
-                // await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
-                //     $"Please confirm your account by <a href='{}'>clicking here</a>.");
-
-                var email = new EmailConfirmationMail
-                {
-                    ConfirmationLink = HtmlEncoder.Default.Encode(callbackUrl)
-                };
-                await _mailerService.SendAsync(email.To(Input.Email));
-                
-                if (_userManager.Options.SignIn.RequireConfirmedAccount)
-                {
-                    return RedirectToPage("RegisterConfirmation", new { email = Input.Email, returnUrl = returnUrl });
-                }
-                else
-                {
-                    await _signInManager.SignInAsync(user, isPersistent: false);
-                    return LocalRedirect(returnUrl);
-                }
-            }
+        if (!result.Succeeded)
+        {
             foreach (var error in result.Errors)
             {
                 ModelState.AddModelError(string.Empty, error.Description);
             }
+            
+            return Page();
         }
 
-        // If we got this far, something failed, redisplay form
-        return Page();
+        _logger.LogInformation("User created a new account with password for email: {Email}", Input.Email);
+                
+        if (_userManager.Options.SignIn.RequireConfirmedAccount)
+        {
+            var userId = await _userManager.GetUserIdAsync(user);
+            var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+            var callbackUrl = Url.Page(
+                "ConfirmEmail",
+                pageHandler: null,
+                values: new { area = "Account", userId, code, returnUrl },
+                protocol: Request.Scheme)!;
+            
+            var email = new EmailConfirmationMail
+            {
+                ConfirmationLink = HtmlEncoder.Default.Encode(callbackUrl)
+            };
+            await _mailerService.SendAsync(email.To(Input.Email));
+            
+            return RedirectToPage("SignUpConfirmation");
+        }
+
+        await _signInManager.SignInAsync(user, isPersistent: false);
+        return LocalRedirect(returnUrl);
     }
 
     private IdentityUser CreateUser()
